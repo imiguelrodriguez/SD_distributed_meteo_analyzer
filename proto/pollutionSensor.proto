@@ -1,0 +1,13 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+message RawPollutionData {
+  int32 co2 = 1;
+  google.protobuf.Timestamp datetime = 2;
+}
+
+// we must define all inputs/outputs with types defined in protobuf, thus, here.
+service BalancingService {
+  rpc SendPollutionData (RawPollutionData) returns (google.protobuf.Empty) {}
+}
