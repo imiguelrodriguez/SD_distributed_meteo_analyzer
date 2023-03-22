@@ -1,50 +1,35 @@
-# tiene que tener las dos llamadas send air y send pollution (como el insulting service)
 import grpc
 from concurrent import futures
 import time
 import airSensor_pb2
 import airSensor_pb2_grpc
+import pollutionSensor_pb2_grpc
 
-class LoadBalancerAirServicer(airSensor_pb2_grpc.BalancingServiceServicer):
+
+class LoadBalancer:
     def __init__(self):
         pass
 
-    def sendAirData(self, data):
-        pass
+    def distributeDataRR(self):
+        print()
 
 
-class LoadBalancerPollutionServicer(airSensor_pb2_grpc.BalancingServiceServicer):
-    def __init__(self):
-        pass
-
-    def sendPollutionData(self, data):
-        pass
-
-
-
-
-    def AddInsult(self, insult, context):
-        insulting_service.add_insult(insult.insult, insult.severity)
-        response = insultingServer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+class LoadBalancerAirServicer(airSensor_pb2_grpc.AirBalancingServiceServicer):
+    def SendAirData(self, data, context):
+        temperature = data.temperature
+        humidity = data.humidity
+        timestamp = data.datetime
+        print(str(temperature) + " ", str(humidity) + " ", str(timestamp) + "")
+        response = airSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
-    def GetInsults(self, empty, context):
-        insults = insulting_service.get_insults()
-        response = insultingServer_pb2.Insults()
-        response.value.extend(insults)
-        return response
 
-    def InsultMe(self, empty, context):
-        insult = insulting_service.insult_me()
-        response = insultingServer_pb2.InsultName()
-        response.insult = insult
-        return response
-
-    def GetSeverity(self, insult_name, context):
-        insult_name = insult_name.insult
-        severity = insulting_service.get_severity(insult_name)
-        response = insultingServer_pb2.Severity()
-        response.severity = severity
+class LoadBalancerPollutionServicer(pollutionSensor_pb2_grpc.PollutionBalancingServiceServicer):
+    def SendPollutionData(self, data, context):
+        co2 = data.co2
+        timestamp = data.datetime
+        print(str(co2) + " ", str(timestamp) + "")
+        response = airSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
 
@@ -53,11 +38,13 @@ server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
 # use the generated function `add_InsultingServiceServicer_to_server`
 # to add the defined class to the server
-insultingServer_pb2_grpc.add_InsultingServiceServicer_to_server(
-    InsultingServiceServicer(), server)
+airSensor_pb2_grpc.add_AirBalancingServiceServicer_to_server(
+    LoadBalancerAirServicer(), server)
+pollutionSensor_pb2_grpc.add_PollutionBalancingServiceServicer_to_server(
+    LoadBalancerPollutionServicer(), server)
 
 # listen on port 50051
-print('Starting server. Listening on port 50051.')
+print('Starting Load Balancer server. Listening on port 50051.')
 server.add_insecure_port('0.0.0.0:50051')
 server.start()
 

@@ -9,6 +9,6 @@ message RawMeteoData {
 }
 
 // we must define all inputs/outputs with types defined in protobuf, thus, here.
-service BalancingService {
+service AirBalancingService {
   rpc SendAirData (RawMeteoData) returns (google.protobuf.Empty) {}
 }

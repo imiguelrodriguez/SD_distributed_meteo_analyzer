@@ -8,6 +8,6 @@ message RawPollutionData {
 }
 
 // we must define all inputs/outputs with types defined in protobuf, thus, here.
-service BalancingService {
+service PollutionBalancingService {
   rpc SendPollutionData (RawPollutionData) returns (google.protobuf.Empty) {}
 }
