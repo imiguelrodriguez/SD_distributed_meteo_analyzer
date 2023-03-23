@@ -1,6 +1,7 @@
 import grpc
 import pollutionSensor_pb2
 import pollutionSensor_pb2_grpc
+import rawTypes_pb2
 from meteo_utils import MeteoDataDetector
 import time
 import datetime
@@ -17,12 +18,12 @@ while True:
 
     # obtain data
     now = datetime.datetime.now()
-    timestamp = pollutionSensor_pb2.google_dot_protobuf_dot_timestamp__pb2.Timestamp()
+    timestamp = rawTypes_pb2.google_dot_protobuf_dot_timestamp__pb2.Timestamp()
     timestamp.FromDatetime(now)
     data = generator.analyze_pollution()
 
     # create a valid request message
-    message = pollutionSensor_pb2.RawPollutionData(co2=int(data['co2']), datetime=timestamp)
+    message = rawTypes_pb2.RawPollutionData(co2=int(data['co2']), datetime=timestamp)
 
     # send message
     stub.SendPollutionData(message)

@@ -1,0 +1,13 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+message RawPollutionData {
+  int32 co2 = 1;
+  google.protobuf.Timestamp datetime = 2;
+}
+
+message RawMeteoData {
+  float temperature = 1;
+  float humidity = 2;
+  google.protobuf.Timestamp datetime = 3;
+}

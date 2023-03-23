@@ -1,17 +1,31 @@
+from queue import Queue
+
 import grpc
 from concurrent import futures
 import time
-import airSensor_pb2
-import airSensor_pb2_grpc
-import pollutionSensor_pb2_grpc
-
+from sensors import airSensor_pb2_grpc, pollutionSensor_pb2_grpc, airSensor_pb2, pollutionSensor_pb2, rawTypes_pb2
 
 class LoadBalancer:
     def __init__(self):
-        pass
+        self._pollutionQueue = Queue()
+        self._airQueue = Queue()
+        self.distributeDataRR()
 
     def distributeDataRR(self):
-        print()
+        print("Distributing data to servers...")
+        print(self._airQueue)
+        print(self._pollutionQueue)
+
+    @property
+    def pollutionQueue(self):
+        return self._pollutionQueue
+
+    @property
+    def airQueue(self):
+        return self._airQueue
+
+
+lb = LoadBalancer()
 
 
 class LoadBalancerAirServicer(airSensor_pb2_grpc.AirBalancingServiceServicer):
@@ -20,6 +34,7 @@ class LoadBalancerAirServicer(airSensor_pb2_grpc.AirBalancingServiceServicer):
         humidity = data.humidity
         timestamp = data.datetime
         print(str(temperature) + " ", str(humidity) + " ", str(timestamp) + "")
+        lb.airQueue.put(data)
         response = airSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
@@ -29,7 +44,8 @@ class LoadBalancerPollutionServicer(pollutionSensor_pb2_grpc.PollutionBalancingS
         co2 = data.co2
         timestamp = data.datetime
         print(str(co2) + " ", str(timestamp) + "")
-        response = airSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        lb.pollutionQueue.put(data)
+        response = pollutionSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
 

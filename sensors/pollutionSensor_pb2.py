@@ -12,18 +12,16 @@ _sym_db = _symbol_database.Default()
 
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
+import sensors.rawTypes_pb2 as rawTypes__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15pollutionSensor.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"M\n\x10RawPollutionData\x12\x0b\n\x03\x63o2\x18\x01 \x01(\x05\x12,\n\x08\x64\x61tetime\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp2]\n\x19PollutionBalancingService\x12@\n\x11SendPollutionData\x12\x11.RawPollutionData\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15pollutionSensor.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x0erawTypes.proto2]\n\x19PollutionBalancingService\x12@\n\x11SendPollutionData\x12\x11.RawPollutionData\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pollutionSensor_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _RAWPOLLUTIONDATA._serialized_start=87
-  _RAWPOLLUTIONDATA._serialized_end=164
-  _POLLUTIONBALANCINGSERVICE._serialized_start=166
-  _POLLUTIONBALANCINGSERVICE._serialized_end=259
+  _POLLUTIONBALANCINGSERVICE._serialized_start=70
+  _POLLUTIONBALANCINGSERVICE._serialized_end=163
 # @@protoc_insertion_point(module_scope)

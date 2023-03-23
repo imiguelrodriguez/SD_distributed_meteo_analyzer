@@ -3,10 +3,10 @@
 import grpc
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-import pollutionSensor_pb2 as pollutionSensor__pb2
+import sensors.rawTypes_pb2 as rawTypes__pb2
 
 
-class PollutionBalancingServiceStub(object):
+class AirBalancingServiceStub(object):
     """we must define all inputs/outputs with types defined in protobuf, thus, here.
     """
 
@@ -16,44 +16,44 @@ class PollutionBalancingServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendPollutionData = channel.unary_unary(
-                '/PollutionBalancingService/SendPollutionData',
-                request_serializer=pollutionSensor__pb2.RawPollutionData.SerializeToString,
+        self.SendAirData = channel.unary_unary(
+                '/AirBalancingService/SendAirData',
+                request_serializer=rawTypes__pb2.RawMeteoData.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
 
 
-class PollutionBalancingServiceServicer(object):
+class AirBalancingServiceServicer(object):
     """we must define all inputs/outputs with types defined in protobuf, thus, here.
     """
 
-    def SendPollutionData(self, request, context):
+    def SendAirData(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_PollutionBalancingServiceServicer_to_server(servicer, server):
+def add_AirBalancingServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendPollutionData': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendPollutionData,
-                    request_deserializer=pollutionSensor__pb2.RawPollutionData.FromString,
+            'SendAirData': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendAirData,
+                    request_deserializer=rawTypes__pb2.RawMeteoData.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'PollutionBalancingService', rpc_method_handlers)
+            'AirBalancingService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class PollutionBalancingService(object):
+class AirBalancingService(object):
     """we must define all inputs/outputs with types defined in protobuf, thus, here.
     """
 
     @staticmethod
-    def SendPollutionData(request,
+    def SendAirData(request,
             target,
             options=(),
             channel_credentials=None,
@@ -63,8 +63,8 @@ class PollutionBalancingService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/PollutionBalancingService/SendPollutionData',
-            pollutionSensor__pb2.RawPollutionData.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/AirBalancingService/SendAirData',
+            rawTypes__pb2.RawMeteoData.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

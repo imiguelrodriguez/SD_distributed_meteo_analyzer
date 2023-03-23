@@ -1,0 +1,9 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+import "rawTypes.proto";
+
+// we must define all inputs/outputs with types defined in protobuf, thus, here.
+service DataProcessingService {
+  rpc ProcessMeteoData (RawMeteoData) returns (google.protobuf.Empty) {}
+  rpc ProcessPollutionData (RawPollutionData) returns (google.protobuf.Empty) {}
+}
