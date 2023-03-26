@@ -42,12 +42,12 @@ stub.SubscribeToLoadBalancer(connection)
 print('Starting Processing server. Listening on port ' + str(port))
 
 server.add_insecure_port('0.0.0.0:' + str(port))
+
 server.start()
 
 # since server.start() will not block,
 # a sleep-loop is added to keep alive
 try:
-    while True:
-        time.sleep(86400)
+    server.wait_for_termination()
 except KeyboardInterrupt:
-    server.stop(0)
+    print("Server stopped.")

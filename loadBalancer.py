@@ -3,7 +3,6 @@ from queue import Queue
 import grpc
 from concurrent import futures
 
-import loadBalancer_pb2_grpc
 from sensors import airSensor_pb2_grpc, pollutionSensor_pb2_grpc, airSensor_pb2, pollutionSensor_pb2
 import processingServer_pb2_grpc
 
@@ -42,7 +41,7 @@ class LoadBalancer:
         self._pollutionQueue = Queue()
         self._airQueue = Queue()
         self._servers = []
-        self.server = None
+        self._server = None
         # self.distributeDataRR()
 
     def distributeDataRR(self):
@@ -54,28 +53,27 @@ class LoadBalancer:
         # listen on port 50051
         print('Starting Load Balancer server. Listening on port 50051 for sensors.')
 
-        self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        self._server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-        # to add the defined class to the server
         airSensor_pb2_grpc.add_AirBalancingServiceServicer_to_server(
-            LoadBalancerAirServicer(), self.server)
+            LoadBalancerAirServicer(), self._server)
         pollutionSensor_pb2_grpc.add_PollutionBalancingServiceServicer_to_server(
-            LoadBalancerPollutionServicer(), self.server)
+            LoadBalancerPollutionServicer(), self._server)
         processingServer_pb2_grpc.add_ConnectionServiceServicer_to_server(
-            ConnectionServiceServicer(), self.server)
+            ConnectionServiceServicer(), self._server)
 
-        self.server.add_insecure_port('[::]:50051')
-        self.server.add_insecure_port('[::]:50052')
+        self._server.add_insecure_port('[::]:50051')
+        self._server.add_insecure_port('[::]:50052')
         print('Listening on port 50052 for new processing servers connection establishing.')
-        self.server.start()
+        self._server.start()
         try:
-            self.server.wait_for_termination()
+            self._server.wait_for_termination()
         except KeyboardInterrupt:
             print("Server stopped.")
 
     def addServer(self, port):
         self._servers.append(port)
-        self.server.add_insecure_port('[::]:' + str(port))
+
         print("Added connection to server in port " + str(port))
 
     @property
