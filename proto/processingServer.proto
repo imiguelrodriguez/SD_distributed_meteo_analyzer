@@ -1,0 +1,24 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+message Connection {
+  int32 port = 1;
+}
+
+message Wellness {
+  float wellness = 1;
+}
+
+message Pollution {
+  float pollution = 1;
+}
+
+// we must define all inputs/outputs with types defined in protobuf, thus, here.
+service DataProcessingService {
+  rpc PutWellness (Wellness) returns (google.protobuf.Empty) {}
+  rpc PutPollution (Pollution) returns (google.protobuf.Empty) {}
+}
+
+service ConnectionService {
+  rpc SubscribeToLoadBalancer (Connection) returns (google.protobuf.Empty) {}
+}

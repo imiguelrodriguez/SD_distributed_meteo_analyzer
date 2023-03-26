@@ -2,30 +2,10 @@ from queue import Queue
 
 import grpc
 from concurrent import futures
-import time
-from sensors import airSensor_pb2_grpc, pollutionSensor_pb2_grpc, airSensor_pb2, pollutionSensor_pb2, rawTypes_pb2
 
-class LoadBalancer:
-    def __init__(self):
-        self._pollutionQueue = Queue()
-        self._airQueue = Queue()
-        self.distributeDataRR()
-
-    def distributeDataRR(self):
-        print("Distributing data to servers...")
-        print(self._airQueue)
-        print(self._pollutionQueue)
-
-    @property
-    def pollutionQueue(self):
-        return self._pollutionQueue
-
-    @property
-    def airQueue(self):
-        return self._airQueue
-
-
-lb = LoadBalancer()
+import loadBalancer_pb2_grpc
+from sensors import airSensor_pb2_grpc, pollutionSensor_pb2_grpc, airSensor_pb2, pollutionSensor_pb2
+import processingServer_pb2_grpc
 
 
 class LoadBalancerAirServicer(airSensor_pb2_grpc.AirBalancingServiceServicer):
@@ -49,25 +29,63 @@ class LoadBalancerPollutionServicer(pollutionSensor_pb2_grpc.PollutionBalancingS
         return response
 
 
-# create a gRPC server
-server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+class ConnectionServiceServicer(processingServer_pb2_grpc.ConnectionServiceServicer):
+    def SubscribeToLoadBalancer(self, connection, context):
+        port = connection.port
+        lb.addServer(port)
+        response = pollutionSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        return response
 
-# use the generated function `add_InsultingServiceServicer_to_server`
-# to add the defined class to the server
-airSensor_pb2_grpc.add_AirBalancingServiceServicer_to_server(
-    LoadBalancerAirServicer(), server)
-pollutionSensor_pb2_grpc.add_PollutionBalancingServiceServicer_to_server(
-    LoadBalancerPollutionServicer(), server)
 
-# listen on port 50051
-print('Starting Load Balancer server. Listening on port 50051.')
-server.add_insecure_port('0.0.0.0:50051')
-server.start()
+class LoadBalancer:
+    def __init__(self):
+        self._pollutionQueue = Queue()
+        self._airQueue = Queue()
+        self._servers = []
+        self.server = None
+        # self.distributeDataRR()
 
-# since server.start() will not block,
-# a sleep-loop is added to keep alive
-try:
-    while True:
-        time.sleep(86400)
-except KeyboardInterrupt:
-    server.stop(0)
+    def distributeDataRR(self):
+        print("Distributing data to servers...")
+        print(self._airQueue)
+        print(self._pollutionQueue)
+
+    def serve(self):
+        # listen on port 50051
+        print('Starting Load Balancer server. Listening on port 50051 for sensors.')
+
+        self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+
+        # to add the defined class to the server
+        airSensor_pb2_grpc.add_AirBalancingServiceServicer_to_server(
+            LoadBalancerAirServicer(), self.server)
+        pollutionSensor_pb2_grpc.add_PollutionBalancingServiceServicer_to_server(
+            LoadBalancerPollutionServicer(), self.server)
+        processingServer_pb2_grpc.add_ConnectionServiceServicer_to_server(
+            ConnectionServiceServicer(), self.server)
+
+        self.server.add_insecure_port('[::]:50051')
+        self.server.add_insecure_port('[::]:50052')
+        print('Listening on port 50052 for new processing servers connection establishing.')
+        self.server.start()
+        try:
+            self.server.wait_for_termination()
+        except KeyboardInterrupt:
+            print("Server stopped.")
+
+    def addServer(self, port):
+        self._servers.append(port)
+        self.server.add_insecure_port('[::]:' + str(port))
+        print("Added connection to server in port " + str(port))
+
+    @property
+    def pollutionQueue(self):
+        return self._pollutionQueue
+
+    @property
+    def airQueue(self):
+        return self._airQueue
+
+
+lb = LoadBalancer()
+lb.serve()
