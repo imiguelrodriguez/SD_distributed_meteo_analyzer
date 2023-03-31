@@ -14,7 +14,7 @@ message Pollution {
 }
 
 // we must define all inputs/outputs with types defined in protobuf, thus, here.
-service DataProcessingService {
+service PutService {
   rpc PutWellness (Wellness) returns (google.protobuf.Empty) {}
   rpc PutPollution (Pollution) returns (google.protobuf.Empty) {}
 }

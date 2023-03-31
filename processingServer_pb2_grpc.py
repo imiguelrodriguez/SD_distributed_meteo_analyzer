@@ -6,7 +6,7 @@ from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 import processingServer_pb2 as processingServer__pb2
 
 
-class DataProcessingServiceStub(object):
+class PutServiceStub(object):
     """we must define all inputs/outputs with types defined in protobuf, thus, here.
     """
 
@@ -17,18 +17,18 @@ class DataProcessingServiceStub(object):
             channel: A grpc.Channel.
         """
         self.PutWellness = channel.unary_unary(
-                '/DataProcessingService/PutWellness',
+                '/PutService/PutWellness',
                 request_serializer=processingServer__pb2.Wellness.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
         self.PutPollution = channel.unary_unary(
-                '/DataProcessingService/PutPollution',
+                '/PutService/PutPollution',
                 request_serializer=processingServer__pb2.Pollution.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
 
 
-class DataProcessingServiceServicer(object):
+class PutServiceServicer(object):
     """we must define all inputs/outputs with types defined in protobuf, thus, here.
     """
 
@@ -45,7 +45,7 @@ class DataProcessingServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_DataProcessingServiceServicer_to_server(servicer, server):
+def add_PutServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'PutWellness': grpc.unary_unary_rpc_method_handler(
                     servicer.PutWellness,
@@ -59,12 +59,12 @@ def add_DataProcessingServiceServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'DataProcessingService', rpc_method_handlers)
+            'PutService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class DataProcessingService(object):
+class PutService(object):
     """we must define all inputs/outputs with types defined in protobuf, thus, here.
     """
 
@@ -79,7 +79,7 @@ class DataProcessingService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/DataProcessingService/PutWellness',
+        return grpc.experimental.unary_unary(request, target, '/PutService/PutWellness',
             processingServer__pb2.Wellness.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
@@ -96,7 +96,7 @@ class DataProcessingService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/DataProcessingService/PutPollution',
+        return grpc.experimental.unary_unary(request, target, '/PutService/PutPollution',
             processingServer__pb2.Pollution.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,

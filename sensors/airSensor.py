@@ -24,9 +24,7 @@ while True:
 
     # create a valid request message
     message = rawTypes_pb2.RawMeteoData(temperature=data['temperature'], humidity=data['humidity'],
-                                         datetime=timestamp)
+                                        datetime=timestamp)
 
     # send message
     stub.SendAirData(message)
-
-

@@ -2,19 +2,31 @@ import time
 
 import grpc
 from concurrent import futures
+import socket
 
 # create a gRPC server
+
 import loadBalancer_pb2_grpc
 import processingServer_pb2
 import processingServer_pb2_grpc
+from sensors import pollutionSensor_pb2, airSensor_pb2
 
 
 class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer):
     def ProcessMeteoData(self, data, context):
-        pass
+        temperature = data.temperature
+        humidity = data.humidity
+        timestamp = data.datetime
+        print(str(temperature) + " ", str(humidity) + " ", str(timestamp) + "")
+        response = airSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        return response
 
     def ProcessPollutionData(self, data, context):
-        pass
+        co2 = data.co2
+        timestamp = data.datetime
+        print(str(co2) + " ", str(timestamp) + "")
+        response = pollutionSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        return response
 
 
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -24,10 +36,10 @@ server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 loadBalancer_pb2_grpc.add_DataProcessingServiceServicer_to_server(
     DataProcessingServicer(), server)
 
+
 # subscribe channel to send the chosen port to the LB
 subscribe_channel = grpc.insecure_channel('localhost:50052')
 
-import socket
 sock = socket.socket()
 sock.bind(('', 0))
 port = sock.getsockname()[1]
@@ -37,6 +49,7 @@ connection.port = port
 print("Chosen port for server: " + str(port))
 stub = processingServer_pb2_grpc.ConnectionServiceStub(subscribe_channel)
 stub.SubscribeToLoadBalancer(connection)
+
 
 # listen on free random port
 print('Starting Processing server. Listening on port ' + str(port))
