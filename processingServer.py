@@ -5,7 +5,7 @@ from concurrent import futures
 import socket
 
 # create a gRPC server
-
+import loadBalancer_pb2
 import loadBalancer_pb2_grpc
 import processingServer_pb2
 import processingServer_pb2_grpc
@@ -18,14 +18,16 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         humidity = data.humidity
         timestamp = data.datetime
         print(str(temperature) + " ", str(humidity) + " ", str(timestamp) + "")
-        response = airSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        time.sleep(4)
+        response = loadBalancer_pb2.Port(port=port)
         return response
 
     def ProcessPollutionData(self, data, context):
         co2 = data.co2
         timestamp = data.datetime
         print(str(co2) + " ", str(timestamp) + "")
-        response = pollutionSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        time.sleep(4)
+        response = loadBalancer_pb2.Port(port=port)
         return response
 
 

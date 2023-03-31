@@ -4,6 +4,7 @@ import grpc
 from concurrent import futures
 
 import loadBalancer_pb2_grpc
+import processingServer_pb2
 import sensors.rawTypes_pb2
 from sensors import airSensor_pb2_grpc, pollutionSensor_pb2_grpc, airSensor_pb2, pollutionSensor_pb2
 import processingServer_pb2_grpc
@@ -35,7 +36,7 @@ class ConnectionServiceServicer(processingServer_pb2_grpc.ConnectionServiceServi
     def SubscribeToLoadBalancer(self, connection, context):
         port = connection.port
         lb.addServer(port)
-        response = pollutionSensor_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        response = processingServer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
 
@@ -48,12 +49,14 @@ class LoadBalancer:
 
     def distributeDataRR(self):
         print("Distributing data to servers...")
-
-        data = self._dataQueue.get(block=True)
-        if isinstance(data, sensors.rawTypes_pb2.RawMeteoData):
-            self._servers[self._serversQueue.get(block=True)].ProcessMeteoData(data)
-        else:
-            self._servers[self._serversQueue.get(block=True)].ProcessPollutionData(data)
+        while True:
+            data = self._dataQueue.get(block=True)
+            if isinstance(data, sensors.rawTypes_pb2.RawMeteoData):
+                port = self._servers[self._serversQueue.get(block=True)].ProcessMeteoData(data)
+                self._serversQueue.put(port.port)
+            else:
+                port = self._servers[self._serversQueue.get(block=True)].ProcessPollutionData(data)
+                self._serversQueue.put(port.port)
 
     def serve(self):
         # listen on port 50051
