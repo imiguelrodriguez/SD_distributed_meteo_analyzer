@@ -6,6 +6,7 @@ import socket
 
 import loadBalancer_pb2
 import loadBalancer_pb2_grpc
+import meteo_utils
 import processingServer_pb2
 import processingServer_pb2_grpc
 
@@ -15,25 +16,24 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         self._ps = ps
         self._connection = processingServer_pb2.Connection(port=self._ps.port)
         self._stub = processingServer_pb2_grpc.ConnectionServiceStub(self._ps.subscribeChannel)
+        self._processor = meteo_utils.MeteoDataProcessor()
 
     def ProcessMeteoData(self, data, context):
         temperature = data.temperature
         humidity = data.humidity
         timestamp = data.datetime
         print(str(temperature) + " ", str(humidity) + " ", str(timestamp) + "")
-        time.sleep(4)
-        self._stub.FreeServer(self._connection)
-        response = loadBalancer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
-        return response
+        wellness = self._processor.process_meteo_data(data)
+        print("wellness: " + str(wellness))
+        return self._connection
 
     def ProcessPollutionData(self, data, context):
         co2 = data.co2
         timestamp = data.datetime
         print(str(co2) + " ", str(timestamp) + "")
-        time.sleep(4)
-        self._stub.FreeServer(self._connection)
-        response = loadBalancer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
-        return response
+        pollution = self._processor.process_pollution_data(data)
+        print("pollution: " + str(pollution))
+        return self._connection
 
 
 class ProcessingServer:

@@ -39,12 +39,6 @@ class ConnectionServiceServicer(processingServer_pb2_grpc.ConnectionServiceServi
         response = processingServer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
-    def FreeServer(self, connection, context):
-        port = connection.port
-        lb.serversQueue.put(port)
-        response = processingServer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
-        return response
-
 
 class LoadBalancer:
     _lbSensorsPort = 50051
@@ -56,14 +50,19 @@ class LoadBalancer:
         self._serversQueue = Queue()
         self._server = None
 
+    def process_response(self, call_future):
+        self._serversQueue.put(call_future.result().port)
+
     def distributeDataRR(self):
         print("Distributing data to servers...")
         while True:
             data = self._dataQueue.get(block=True)
             if isinstance(data, sensors.rawTypes_pb2.RawMeteoData):
-                self._servers[self._serversQueue.get(block=True)].ProcessMeteoData(data)
+                call_future = self._servers[self._serversQueue.get(block=True)].ProcessMeteoData.future(data)
+                call_future.add_done_callback(self.process_response)
             else:
-                self._servers[self._serversQueue.get(block=True)].ProcessPollutionData(data)
+                call_future = self._servers[self._serversQueue.get(block=True)].ProcessPollutionData.future(data)
+                call_future.add_done_callback(self.process_response)
 
     def serve(self):
         # listen on port 50051
