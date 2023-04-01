@@ -4,10 +4,10 @@ import grpc
 from concurrent import futures
 
 import loadBalancer_pb2_grpc
-import processingServer_pb2
+import ps.processingServer_pb2 as processingServer_pb2
 import sensors.rawTypes_pb2
 from sensors import airSensor_pb2_grpc, pollutionSensor_pb2_grpc, airSensor_pb2, pollutionSensor_pb2
-import processingServer_pb2_grpc
+from ps import processingServer_pb2_grpc
 
 
 class LoadBalancerAirServicer(airSensor_pb2_grpc.AirBalancingServiceServicer):

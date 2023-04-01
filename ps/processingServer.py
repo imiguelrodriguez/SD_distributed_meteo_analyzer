@@ -5,7 +5,7 @@ from concurrent import futures
 import socket
 import redis
 
-import loadBalancer_pb2_grpc
+from lb import loadBalancer_pb2_grpc
 import meteo_utils
 import processingServer_pb2
 import processingServer_pb2_grpc

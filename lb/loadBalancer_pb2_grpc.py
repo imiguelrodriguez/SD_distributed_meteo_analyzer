@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import loadBalancer_pb2 as loadBalancer__pb2
+import lb.loadBalancer_pb2 as loadBalancer__pb2
 import sensors.rawTypes_pb2 as rawTypes__pb2
 
 
