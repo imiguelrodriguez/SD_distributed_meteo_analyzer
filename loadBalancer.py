@@ -39,8 +39,17 @@ class ConnectionServiceServicer(processingServer_pb2_grpc.ConnectionServiceServi
         response = processingServer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
+    def FreeServer(self, connection, context):
+        port = connection.port
+        lb.serversQueue.put(port)
+        response = processingServer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        return response
+
 
 class LoadBalancer:
+    _lbSensorsPort = 50051
+    _lbServersPort = 50052
+
     def __init__(self):
         self._dataQueue = Queue()
         self._servers = dict()  # this dictionary will store ports as keys and their correspondent stubs as values
@@ -52,11 +61,9 @@ class LoadBalancer:
         while True:
             data = self._dataQueue.get(block=True)
             if isinstance(data, sensors.rawTypes_pb2.RawMeteoData):
-                port = self._servers[self._serversQueue.get(block=True)].ProcessMeteoData(data)
-                self._serversQueue.put(port.port)
+                self._servers[self._serversQueue.get(block=True)].ProcessMeteoData(data)
             else:
-                port = self._servers[self._serversQueue.get(block=True)].ProcessPollutionData(data)
-                self._serversQueue.put(port.port)
+                self._servers[self._serversQueue.get(block=True)].ProcessPollutionData(data)
 
     def serve(self):
         # listen on port 50051
@@ -71,8 +78,8 @@ class LoadBalancer:
             processingServer_pb2_grpc.add_ConnectionServiceServicer_to_server(
                 ConnectionServiceServicer(), self._server)
 
-            self._server.add_insecure_port('[::]:50051')
-            self._server.add_insecure_port('[::]:50052')
+            self._server.add_insecure_port('[::]:' + str(self._lbSensorsPort))
+            self._server.add_insecure_port('[::]:' + str(self._lbServersPort))
             print('Listening on port 50052 for new processing servers connection establishing.')
             self._server.start()
             try:
@@ -91,9 +98,18 @@ class LoadBalancer:
     def dataQueue(self):
         return self._dataQueue
 
+    @property
+    def serversQueue(self):
+        return self._serversQueue
 
-lb = LoadBalancer()
+    @property
+    def lbServersPort(self):
+        return self._lbServersPort
 
-with futures.ThreadPoolExecutor(max_workers=2) as executor:
-    executor.submit(lb.serve)
-    executor.submit(lb.distributeDataRR)
+
+if __name__ == '__main__':
+    lb = LoadBalancer()
+
+    with futures.ThreadPoolExecutor(max_workers=2) as executor:
+        executor.submit(lb.serve)
+        executor.submit(lb.distributeDataRR)

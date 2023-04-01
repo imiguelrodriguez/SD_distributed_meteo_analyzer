@@ -4,22 +4,26 @@ import grpc
 from concurrent import futures
 import socket
 
-# create a gRPC server
 import loadBalancer_pb2
 import loadBalancer_pb2_grpc
 import processingServer_pb2
 import processingServer_pb2_grpc
-from sensors import pollutionSensor_pb2, airSensor_pb2
 
 
 class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer):
+    def __init__(self, ps):
+        self._ps = ps
+        self._connection = processingServer_pb2.Connection(port=self._ps.port)
+        self._stub = processingServer_pb2_grpc.ConnectionServiceStub(self._ps.subscribeChannel)
+
     def ProcessMeteoData(self, data, context):
         temperature = data.temperature
         humidity = data.humidity
         timestamp = data.datetime
         print(str(temperature) + " ", str(humidity) + " ", str(timestamp) + "")
         time.sleep(4)
-        response = loadBalancer_pb2.Port(port=port)
+        self._stub.FreeServer(self._connection)
+        response = loadBalancer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
     def ProcessPollutionData(self, data, context):
@@ -27,42 +31,51 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         timestamp = data.datetime
         print(str(co2) + " ", str(timestamp) + "")
         time.sleep(4)
-        response = loadBalancer_pb2.Port(port=port)
+        self._stub.FreeServer(self._connection)
+        response = loadBalancer_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
 
-server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+class ProcessingServer:
+    def __init__(self):
+        self._server = None
+        self._subscribeChannel = None
+        sock = socket.socket()
+        sock.bind(('', 0))
+        self._port = sock.getsockname()[1]
+        self.subscribeToLB()
+        self.serve()
 
-# use the generated function `add_InsultingServiceServicer_to_server`
-# to add the defined class to the server
-loadBalancer_pb2_grpc.add_DataProcessingServiceServicer_to_server(
-    DataProcessingServicer(), server)
+    def subscribeToLB(self):
+        # subscribe channel to send the chosen port to the LB
+        self._subscribeChannel = grpc.insecure_channel('localhost:50052')
+        connection = processingServer_pb2.Connection()
+        connection.port = self._port
+        print("Chosen port for server: " + str(self._port))
+        stub = processingServer_pb2_grpc.ConnectionServiceStub(self._subscribeChannel)
+        stub.SubscribeToLoadBalancer(connection)
+
+    def serve(self):
+        print('Starting Processing server. Listening on port ' + str(self._port))
+        with futures.ThreadPoolExecutor(max_workers=10) as pool:
+            self._server = grpc.server(pool)
+            # to add the defined class to the server
+            loadBalancer_pb2_grpc.add_DataProcessingServiceServicer_to_server(
+                DataProcessingServicer(self), self._server)
+            self._server.add_insecure_port('0.0.0.0:' + str(self._port))
+            self._server.start()
+            try:
+                self._server.wait_for_termination()
+            except KeyboardInterrupt or Exception:
+                print("Server stopped.")
+
+    @property
+    def port(self):
+        return self._port
+
+    @property
+    def subscribeChannel(self):
+        return self._subscribeChannel
 
 
-# subscribe channel to send the chosen port to the LB
-subscribe_channel = grpc.insecure_channel('localhost:50052')
-
-sock = socket.socket()
-sock.bind(('', 0))
-port = sock.getsockname()[1]
-
-connection = processingServer_pb2.Connection()
-connection.port = port
-print("Chosen port for server: " + str(port))
-stub = processingServer_pb2_grpc.ConnectionServiceStub(subscribe_channel)
-stub.SubscribeToLoadBalancer(connection)
-
-
-# listen on free random port
-print('Starting Processing server. Listening on port ' + str(port))
-
-server.add_insecure_port('0.0.0.0:' + str(port))
-
-server.start()
-
-# since server.start() will not block,
-# a sleep-loop is added to keep alive
-try:
-    server.wait_for_termination()
-except KeyboardInterrupt:
-    print("Server stopped.")
+ProcessingServer()

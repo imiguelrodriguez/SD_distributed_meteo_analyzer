@@ -21,4 +21,5 @@ service PutService {
 
 service ConnectionService {
   rpc SubscribeToLoadBalancer (Connection) returns (google.protobuf.Empty) {}
+  rpc FreeServer (Connection) returns (google.protobuf.Empty) {}
 }

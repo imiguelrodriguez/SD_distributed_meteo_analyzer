@@ -1,12 +1,9 @@
 syntax = "proto3";
 import "rawTypes.proto";
-
-message Port {
-  int32 port = 1;
-}
+import "google/protobuf/empty.proto";
 
 // we must define all inputs/outputs with types defined in protobuf, thus, here.
 service DataProcessingService {
-  rpc ProcessMeteoData (RawMeteoData) returns (Port) {}
-  rpc ProcessPollutionData (RawPollutionData) returns (Port) {}
+  rpc ProcessMeteoData (RawMeteoData) returns (google.protobuf.Empty) {}
+  rpc ProcessPollutionData (RawPollutionData) returns (google.protobuf.Empty) {}
 }
