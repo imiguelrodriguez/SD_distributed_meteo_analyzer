@@ -12,23 +12,22 @@ _sym_db = _symbol_database.Default()
 
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16processingServer.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x1a\n\nConnection\x12\x0c\n\x04port\x18\x01 \x01(\x05\"\x1c\n\x08Wellness\x12\x10\n\x08wellness\x18\x01 \x01(\x02\"\x1e\n\tPollution\x12\x11\n\tpollution\x18\x01 \x01(\x02\x32v\n\nPutService\x12\x32\n\x0bPutWellness\x12\t.Wellness\x1a\x16.google.protobuf.Empty\"\x00\x12\x34\n\x0cPutPollution\x12\n.Pollution\x1a\x16.google.protobuf.Empty\"\x00\x32\x8a\x01\n\x11\x43onnectionService\x12@\n\x17SubscribeToLoadBalancer\x12\x0b.Connection\x1a\x16.google.protobuf.Empty\"\x00\x12\x33\n\nFreeServer\x12\x0b.Connection\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16processingServer.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x1a\n\nConnection\x12\x0c\n\x04port\x18\x01 \x01(\x05\"J\n\x08Wellness\x12\x10\n\x08wellness\x18\x01 \x01(\x02\x12,\n\x08\x64\x61tetime\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"L\n\tPollution\x12\x11\n\tpollution\x18\x01 \x01(\x02\x12,\n\x08\x64\x61tetime\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp2U\n\x11\x43onnectionService\x12@\n\x17SubscribeToLoadBalancer\x12\x0b.Connection\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'processingServer_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _CONNECTION._serialized_start=55
-  _CONNECTION._serialized_end=81
-  _WELLNESS._serialized_start=83
-  _WELLNESS._serialized_end=111
-  _POLLUTION._serialized_start=113
-  _POLLUTION._serialized_end=143
-  _PUTSERVICE._serialized_start=145
-  _PUTSERVICE._serialized_end=263
-  _CONNECTIONSERVICE._serialized_start=266
-  _CONNECTIONSERVICE._serialized_end=404
+  _CONNECTION._serialized_start=88
+  _CONNECTION._serialized_end=114
+  _WELLNESS._serialized_start=116
+  _WELLNESS._serialized_end=190
+  _POLLUTION._serialized_start=192
+  _POLLUTION._serialized_end=268
+  _CONNECTIONSERVICE._serialized_start=270
+  _CONNECTIONSERVICE._serialized_end=355
 # @@protoc_insertion_point(module_scope)

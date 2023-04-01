@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 message Connection {
   int32 port = 1;
@@ -7,16 +8,12 @@ message Connection {
 
 message Wellness {
   float wellness = 1;
+  google.protobuf.Timestamp datetime = 2;
 }
 
 message Pollution {
   float pollution = 1;
-}
-
-// we must define all inputs/outputs with types defined in protobuf, thus, here.
-service PutService {
-  rpc PutWellness (Wellness) returns (google.protobuf.Empty) {}
-  rpc PutPollution (Pollution) returns (google.protobuf.Empty) {}
+  google.protobuf.Timestamp datetime = 2;
 }
 
 service ConnectionService {
