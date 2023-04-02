@@ -3,11 +3,11 @@
 import grpc
 
 import lb.loadBalancer_pb2 as loadBalancer__pb2
-import sensors.rawTypes_pb2 as rawTypes__pb2
+import data.rawTypes_pb2 as rawTypes__pb2
 
 
 class DataProcessingServiceStub(object):
-    """we must define all inputs/outputs with types defined in protobuf, thus, here.
+    """we must define all inputs/outputs with data defined in protobuf, thus, here.
     """
 
     def __init__(self, channel):
@@ -29,7 +29,7 @@ class DataProcessingServiceStub(object):
 
 
 class DataProcessingServiceServicer(object):
-    """we must define all inputs/outputs with types defined in protobuf, thus, here.
+    """we must define all inputs/outputs with data defined in protobuf, thus, here.
     """
 
     def ProcessMeteoData(self, request, context):
@@ -65,7 +65,7 @@ def add_DataProcessingServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class DataProcessingService(object):
-    """we must define all inputs/outputs with types defined in protobuf, thus, here.
+    """we must define all inputs/outputs with data defined in protobuf, thus, here.
     """
 
     @staticmethod

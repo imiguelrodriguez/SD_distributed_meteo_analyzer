@@ -3,11 +3,11 @@
 import grpc
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-import sensors.rawTypes_pb2 as rawTypes__pb2
+import data.rawTypes_pb2 as rawTypes__pb2
 
 
 class PollutionBalancingServiceStub(object):
-    """we must define all inputs/outputs with types defined in protobuf, thus, here.
+    """we must define all inputs/outputs with data defined in protobuf, thus, here.
     """
 
     def __init__(self, channel):
@@ -24,7 +24,7 @@ class PollutionBalancingServiceStub(object):
 
 
 class PollutionBalancingServiceServicer(object):
-    """we must define all inputs/outputs with types defined in protobuf, thus, here.
+    """we must define all inputs/outputs with data defined in protobuf, thus, here.
     """
 
     def SendPollutionData(self, request, context):
@@ -49,7 +49,7 @@ def add_PollutionBalancingServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class PollutionBalancingService(object):
-    """we must define all inputs/outputs with types defined in protobuf, thus, here.
+    """we must define all inputs/outputs with data defined in protobuf, thus, here.
     """
 
     @staticmethod

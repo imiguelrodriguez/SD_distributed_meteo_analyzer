@@ -3,12 +3,11 @@
 import grpc
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-import data.rawTypes_pb2 as rawTypes__pb2
+import proxy_pb2 as proxy__pb2
 
 
-class AirBalancingServiceStub(object):
-    """we must define all inputs/outputs with data defined in protobuf, thus, here.
-    """
+class ResultsServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -16,44 +15,42 @@ class AirBalancingServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendAirData = channel.unary_unary(
-                '/AirBalancingService/SendAirData',
-                request_serializer=rawTypes__pb2.RawMeteoData.SerializeToString,
+        self.SendResults = channel.unary_unary(
+                '/ResultsService/SendResults',
+                request_serializer=proxy__pb2.Result.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
 
 
-class AirBalancingServiceServicer(object):
-    """we must define all inputs/outputs with data defined in protobuf, thus, here.
-    """
+class ResultsServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
 
-    def SendAirData(self, request, context):
+    def SendResults(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_AirBalancingServiceServicer_to_server(servicer, server):
+def add_ResultsServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendAirData': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendAirData,
-                    request_deserializer=rawTypes__pb2.RawMeteoData.FromString,
+            'SendResults': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendResults,
+                    request_deserializer=proxy__pb2.Result.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'AirBalancingService', rpc_method_handlers)
+            'ResultsService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class AirBalancingService(object):
-    """we must define all inputs/outputs with data defined in protobuf, thus, here.
-    """
+class ResultsService(object):
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def SendAirData(request,
+    def SendResults(request,
             target,
             options=(),
             channel_credentials=None,
@@ -63,8 +60,8 @@ class AirBalancingService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/AirBalancingService/SendAirData',
-            rawTypes__pb2.RawMeteoData.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ResultsService/SendResults',
+            proxy__pb2.Result.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

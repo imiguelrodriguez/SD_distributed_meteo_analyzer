@@ -1,14 +1,15 @@
 import pickle
+import socket
+from concurrent import futures
 
 import grpc
-from concurrent import futures
-import socket
 import redis
 
-from lb import loadBalancer_pb2_grpc
 import meteo_utils
 import processingServer_pb2
 import processingServer_pb2_grpc
+from lb import loadBalancer_pb2_grpc
+from data import processedTypes_pb2
 
 
 class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer):
@@ -26,7 +27,7 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         print(str(temperature) + " ", str(humidity) + " ", str(timestamp) + "")
         wellness = self._processor.process_meteo_data(data)
         print("wellness: " + str(wellness))
-        wellness = processingServer_pb2.Wellness(wellness=wellness, datetime=timestamp)
+        wellness = processedTypes_pb2.Wellness(wellness=wellness, datetime=timestamp)
         wellness_pkl = pickle.dumps(wellness)
         self._r.lpush("wellness", wellness_pkl)
         return self._connection
@@ -37,7 +38,7 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         print(str(co2) + " ", str(timestamp) + "")
         pollution = self._processor.process_pollution_data(data)
         print("pollution: " + str(pollution))
-        pollution = processingServer_pb2.Pollution(pollution=pollution, datetime=timestamp)
+        pollution = processedTypes_pb2.Pollution(pollution=pollution, datetime=timestamp)
         pollution_pkl = pickle.dumps(pollution)
         self._r.lpush("pollution", pollution_pkl)
         return self._connection

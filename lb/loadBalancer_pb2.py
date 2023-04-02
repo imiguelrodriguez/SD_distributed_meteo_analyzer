@@ -11,7 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import sensors.rawTypes_pb2 as rawTypes__pb2
+import data.rawTypes_pb2 as rawTypes__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12loadBalancer.proto\x1a\x0erawTypes.proto\"\x14\n\x04Port\x12\x0c\n\x04port\x18\x01 \x01(\x05\x32w\n\x15\x44\x61taProcessingService\x12*\n\x10ProcessMeteoData\x12\r.RawMeteoData\x1a\x05.Port\"\x00\x12\x32\n\x14ProcessPollutionData\x12\x11.RawPollutionData\x1a\x05.Port\"\x00\x62\x06proto3')

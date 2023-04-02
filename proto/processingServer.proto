@@ -1,19 +1,8 @@
 syntax = "proto3";
 import "google/protobuf/empty.proto";
-import "google/protobuf/timestamp.proto";
 
 message Connection {
   int32 port = 1;
-}
-
-message Wellness {
-  float wellness = 1;
-  google.protobuf.Timestamp datetime = 2;
-}
-
-message Pollution {
-  float pollution = 1;
-  google.protobuf.Timestamp datetime = 2;
 }
 
 service ConnectionService {

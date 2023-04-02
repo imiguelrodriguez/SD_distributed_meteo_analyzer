@@ -12,7 +12,7 @@ _sym_db = _symbol_database.Default()
 
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-import sensors.rawTypes_pb2 as rawTypes__pb2
+import data.rawTypes_pb2 as rawTypes__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x61irSensor.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x0erawTypes.proto2M\n\x13\x41irBalancingService\x12\x36\n\x0bSendAirData\x12\r.RawMeteoData\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3')

@@ -1,7 +1,7 @@
 import grpc
 import airSensor_pb2
 import airSensor_pb2_grpc
-import rawTypes_pb2
+from data import rawTypes_pb2
 from meteo_utils import MeteoDataDetector
 import time
 import datetime

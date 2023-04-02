@@ -1,0 +1,12 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+message Wellness {
+  float wellness = 1;
+  google.protobuf.Timestamp datetime = 2;
+}
+
+message Pollution {
+  float pollution = 1;
+  google.protobuf.Timestamp datetime = 2;
+}

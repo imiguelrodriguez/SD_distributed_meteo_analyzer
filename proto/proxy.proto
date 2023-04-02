@@ -1,0 +1,12 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+import "processedTypes.proto";
+
+message Result {
+  Wellness wellness = 1;
+  Pollution pollution = 2;
+}
+
+service ResultsService {
+  rpc SendResults (Result) returns (google.protobuf.Empty) {}
+}
