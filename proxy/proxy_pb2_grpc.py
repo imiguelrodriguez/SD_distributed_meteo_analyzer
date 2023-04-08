@@ -3,10 +3,10 @@
 import grpc
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-import terminal.terminal_pb2 as terminal__pb2
+import proxy_pb2 as proxy__pb2
 
 
-class ConnectionTServiceStub(object):
+class ResultsServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -15,42 +15,42 @@ class ConnectionTServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SubscribeToProxy = channel.unary_unary(
-                '/ConnectionTService/SubscribeToProxy',
-                request_serializer=terminal__pb2.ConnectionT.SerializeToString,
+        self.SendResults = channel.unary_unary(
+                '/ResultsService/SendResults',
+                request_serializer=proxy__pb2.Result.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
 
 
-class ConnectionTServiceServicer(object):
+class ResultsServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def SubscribeToProxy(self, request, context):
+    def SendResults(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_ConnectionTServiceServicer_to_server(servicer, server):
+def add_ResultsServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SubscribeToProxy': grpc.unary_unary_rpc_method_handler(
-                    servicer.SubscribeToProxy,
-                    request_deserializer=terminal__pb2.ConnectionT.FromString,
+            'SendResults': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendResults,
+                    request_deserializer=proxy__pb2.Result.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'ConnectionTService', rpc_method_handlers)
+            'ResultsService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class ConnectionTService(object):
+class ResultsService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def SubscribeToProxy(request,
+    def SendResults(request,
             target,
             options=(),
             channel_credentials=None,
@@ -60,8 +60,8 @@ class ConnectionTService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ConnectionTService/SubscribeToProxy',
-            terminal__pb2.ConnectionT.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ResultsService/SendResults',
+            proxy__pb2.Result.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

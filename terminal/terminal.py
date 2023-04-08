@@ -1,10 +1,8 @@
 import socket
-
 import grpc
 
-import terminal_pb2
-
 import terminal_pb2_grpc
+import terminal_pb2
 
 
 class Terminal:
@@ -13,11 +11,11 @@ class Terminal:
         sock = socket.socket()
         sock.bind(('', 0))
         self._port = sock.getsockname()[1]
-        self.subscribeToP()
+        self.subscribeToProxy()
 
-    def subscribeToP(self):
+    def subscribeToProxy(self):
         # subscribe channel to send the chosen port to the LB
-        self._subscribeChannel = grpc.insecure_channel('localhost:50053')
+        self._subscribeChannel = grpc.insecure_channel('localhost:50054')
         connectionT = terminal_pb2.ConnectionT()
         connectionT.port = self._port
         print("Chosen port for terminal: " + str(self._port))

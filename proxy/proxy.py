@@ -1,11 +1,14 @@
+import pickle
 import time
 from concurrent import futures
 from queue import Queue
-import pickle
+
 import grpc
 import redis
 
-from terminal import terminal_pb2, terminal_pb2_grpc
+import proxy_pb2
+import proxy_pb2_grpc
+from terminal import terminal_pb2_grpc, terminal_pb2
 
 
 class WellnessAux:
@@ -25,17 +28,18 @@ class PollutionAux:
     def __str__(self):
         return "Pollution: " + str(self.pollution) + " Timestamp: " + str(self.timestamp)
 
-class ConnectionTerminalServiceServicer(terminal_pb2_grpc.ConnectionTServiceServicer):
-    def SubscribeToProxy(self, connection, context):
-        port = connection.port
+
+class ConnectionTServiceServicer(terminal_pb2_grpc.ConnectionTServiceServicer):
+    def SubscribeToProxy(self, connectionT, context):
+        port = connectionT.port
         p.addTerminal(port)
         response = terminal_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
 
-class ResultsServiceServicer(terminal_pb2_grpc.ResultsServiceServicer):
+class ResultsServiceServicer(proxy_pb2_grpc.ResultsServiceServicer):
     def SendResults(self, request, context):
-        response = terminal_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        response = proxy_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
 
@@ -47,19 +51,17 @@ class Proxy:
         self._terminals = dict()  # this dictionary will store ports as keys and their correspondent stubs as values
         self._terminalsQueue = Queue()
         self._server = None
-        self._serverPort = 50053
+        self._serverPort = 50054
+
+    def tumblingWindow(self):
         while True:
             print(pickle.loads(self._r.rpop("wellness")))
             print(pickle.loads(self._r.rpop("pollution")))
             time.sleep(1)
-        #self.serve()
-
-    def tumblingWindow(self):
-        pass
 
     def addTerminal(self, port):
         channel = grpc.insecure_channel('localhost:' + str(port))
-        self._terminals[port] = terminal_pb2_grpc.ResultsServiceStub(channel)
+        self._terminals[port] = proxy_pb2_grpc.ResultsServiceStub(channel)
         self._terminalsQueue.put(port)
 
         print("Added connection to terminal in port " + str(port))
@@ -67,13 +69,13 @@ class Proxy:
     def serve(self):
 
         # listen on port 50053
-        print('Starting Proxy server. Listening on port 50053 for terminals to establish connection.')
+        print('Starting Proxy server. Listening on port 50054 for terminals to establish connection.')
         with futures.ThreadPoolExecutor(max_workers=10) as pool:
             self._server = grpc.server(pool)
-            terminal_pb2_grpc.add_ResultsServiceServicer_to_server(
+            proxy_pb2_grpc.add_ResultsServiceServicer_to_server(
                 ResultsServiceServicer(), self._server)
             terminal_pb2_grpc.add_ConnectionTServiceServicer_to_server(
-                ConnectionTerminalServiceServicer(), self._server)
+                ConnectionTServiceServicer(), self._server)
 
             self._server.add_insecure_port('[::]:' + str(self._serverPort))
             self._server.start()
@@ -83,4 +85,9 @@ class Proxy:
                 print("Server stopped.")
 
 
-p = Proxy()
+if __name__ == '__main__':
+    p = Proxy()
+
+    with futures.ThreadPoolExecutor(max_workers=2) as executor:
+        executor.submit(p.serve)
+        executor.submit(p.tumblingWindow)
