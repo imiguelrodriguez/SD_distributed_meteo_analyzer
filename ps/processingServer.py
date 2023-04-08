@@ -1,15 +1,25 @@
-import pickle
-import socket
 from concurrent import futures
 
 import grpc
 import redis
-
+import pickle
+import socket
 import meteo_utils
 import processingServer_pb2
 import processingServer_pb2_grpc
 from lb import loadBalancer_pb2_grpc
-from data import processedTypes_pb2
+
+
+class WellnessAux:
+    def __init__(self, wellness, datetime):
+        self.wellness = wellness
+        self.timestamp = datetime
+
+
+class PollutionAux:
+    def __init__(self, pollution, datetime):
+        self.pollution = pollution
+        self.timestamp = datetime
 
 
 class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer):
@@ -27,9 +37,12 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         print(str(temperature) + " ", str(humidity) + " ", str(timestamp) + "")
         wellness = self._processor.process_meteo_data(data)
         print("wellness: " + str(wellness))
-        wellness = processedTypes_pb2.Wellness(wellness=wellness, datetime=timestamp)
+        wellness = WellnessAux(wellness=wellness, datetime=timestamp)
         wellness_pkl = pickle.dumps(wellness)
-        self._r.lpush("wellness", wellness_pkl)
+        try:
+            self._r.lpush("wellness", wellness_pkl)
+        except Exception:
+            print("Error in connection to REDIS server")
         return self._connection
 
     def ProcessPollutionData(self, data, context):
@@ -38,9 +51,12 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         print(str(co2) + " ", str(timestamp) + "")
         pollution = self._processor.process_pollution_data(data)
         print("pollution: " + str(pollution))
-        pollution = processedTypes_pb2.Pollution(pollution=pollution, datetime=timestamp)
+        pollution = PollutionAux(pollution=pollution, datetime=timestamp)
         pollution_pkl = pickle.dumps(pollution)
-        self._r.lpush("pollution", pollution_pkl)
+        try:
+            self._r.lpush("pollution", pollution_pkl)
+        except Exception:
+            print("Error in connection to REDIS server")
         return self._connection
 
 
