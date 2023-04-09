@@ -1,0 +1,2 @@
+WELLNESS = "wellness"
+POLLUTION = "pollution"

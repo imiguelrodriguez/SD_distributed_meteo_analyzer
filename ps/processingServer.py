@@ -7,6 +7,7 @@ import socket
 import meteo_utils
 import processingServer_pb2
 import processingServer_pb2_grpc
+import redisQueues
 from lb import loadBalancer_pb2_grpc
 
 
@@ -40,7 +41,7 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         wellness = WellnessAux(wellness=wellness, datetime=timestamp)
         wellness_pkl = pickle.dumps(wellness)
         try:
-            self._r.lpush("wellness", wellness_pkl)
+            self._r.lpush(redisQueues.WELLNESS, wellness_pkl)
         except Exception:
             print("Error in connection to REDIS server")
         return self._connection
@@ -54,9 +55,9 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         pollution = PollutionAux(pollution=pollution, datetime=timestamp)
         pollution_pkl = pickle.dumps(pollution)
         try:
-            self._r.lpush("pollution", pollution_pkl)
-        except Exception:
-            print("Error in connection to REDIS server")
+            self._r.lpush(redisQueues.POLLUTION, pollution_pkl)
+        except Exception as e:
+            print(e)
         return self._connection
 
 
