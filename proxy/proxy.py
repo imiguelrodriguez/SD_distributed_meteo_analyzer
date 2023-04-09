@@ -8,7 +8,7 @@ import redis
 
 import proxy_pb2
 import proxy_pb2_grpc
-from terminal import terminal_pb2_grpc, terminal_pb2
+from terminal import userTerminal_pb2_grpc, userTerminal_pb2
 
 
 class WellnessAux:
@@ -29,11 +29,11 @@ class PollutionAux:
         return "Pollution: " + str(self.pollution) + " Timestamp: " + str(self.timestamp)
 
 
-class ConnectionTServiceServicer(terminal_pb2_grpc.ConnectionTServiceServicer):
+class ConnectionTServiceServicer(userTerminal_pb2_grpc.ConnectionTServiceServicer):
     def SubscribeToProxy(self, connectionT, context):
         port = connectionT.port
         p.addTerminal(port)
-        response = terminal_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+        response = userTerminal_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
         return response
 
 
@@ -47,11 +47,15 @@ class Proxy:
     MAX_SECONDS = 4
 
     def __init__(self):
-        self._r = redis.Redis(host="localhost", port=6379)
+        try:
+            self._r = redis.Redis(host="localhost", port=6379)
+        except Exception as e:
+            print("There is a problem when connecting to the REDIS server.")
+            print(e)
         self._terminals = dict()  # this dictionary will store ports as keys and their correspondent stubs as values
         self._terminalsQueue = Queue()
         self._server = None
-        self._serverPort = 50054
+        self._serverPort = 50055
 
     def tumblingWindow(self):
         while True:
@@ -68,13 +72,13 @@ class Proxy:
 
     def serve(self):
 
-        # listen on port 50053
-        print('Starting Proxy server. Listening on port 50054 for terminals to establish connection.')
+        # listen on port 50055
+        print('Starting Proxy server. Listening on port 50055 for terminals to establish connection.')
         with futures.ThreadPoolExecutor(max_workers=10) as pool:
             self._server = grpc.server(pool)
             proxy_pb2_grpc.add_ResultsServiceServicer_to_server(
                 ResultsServiceServicer(), self._server)
-            terminal_pb2_grpc.add_ConnectionTServiceServicer_to_server(
+            userTerminal_pb2_grpc.add_ConnectionTServiceServicer_to_server(
                 ConnectionTServiceServicer(), self._server)
 
             self._server.add_insecure_port('[::]:' + str(self._serverPort))

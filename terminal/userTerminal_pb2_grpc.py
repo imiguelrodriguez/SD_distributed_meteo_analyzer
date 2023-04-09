@@ -3,7 +3,7 @@
 import grpc
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-import terminal.terminal_pb2 as terminal__pb2
+from terminal import userTerminal_pb2 as userTerminal__pb2
 
 
 class ConnectionTServiceStub(object):
@@ -17,7 +17,7 @@ class ConnectionTServiceStub(object):
         """
         self.SubscribeToProxy = channel.unary_unary(
                 '/ConnectionTService/SubscribeToProxy',
-                request_serializer=terminal__pb2.ConnectionT.SerializeToString,
+                request_serializer=userTerminal__pb2.ConnectionT.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
 
@@ -36,7 +36,7 @@ def add_ConnectionTServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'SubscribeToProxy': grpc.unary_unary_rpc_method_handler(
                     servicer.SubscribeToProxy,
-                    request_deserializer=terminal__pb2.ConnectionT.FromString,
+                    request_deserializer=userTerminal__pb2.ConnectionT.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
@@ -61,7 +61,7 @@ class ConnectionTService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/ConnectionTService/SubscribeToProxy',
-            terminal__pb2.ConnectionT.SerializeToString,
+            userTerminal__pb2.ConnectionT.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -1,8 +1,8 @@
 import socket
 import grpc
 
-import terminal_pb2_grpc
-import terminal_pb2
+import userTerminal_pb2
+import userTerminal_pb2_grpc
 
 
 class Terminal:
@@ -12,19 +12,22 @@ class Terminal:
         sock.bind(('', 0))
         self._port = sock.getsockname()[1]
         self.subscribeToProxy()
+        self.plot()
 
     def subscribeToProxy(self):
         # subscribe channel to send the chosen port to the LB
-        self._subscribeChannel = grpc.insecure_channel('localhost:50054')
-        connectionT = terminal_pb2.ConnectionT()
+        self._subscribeChannel = grpc.insecure_channel('localhost:50055')
+        connectionT = userTerminal_pb2.ConnectionT()
         connectionT.port = self._port
         print("Chosen port for terminal: " + str(self._port))
-        stub = terminal_pb2_grpc.ConnectionTServiceStub(self._subscribeChannel)
+        stub = userTerminal_pb2_grpc.ConnectionTServiceStub(self._subscribeChannel)
         stub.SubscribeToProxy(connectionT)
 
     def plot(self):
+        print("I'm plotting")
         pass
 
 
-t = Terminal()
+if __name__ == '__main__':
+    t = Terminal()
 
