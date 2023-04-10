@@ -2,7 +2,6 @@ import pickle
 import sys
 import time
 from concurrent import futures
-from queue import Queue
 
 import grpc
 import redis
@@ -39,12 +38,6 @@ class ConnectionTServiceServicer(userTerminal_pb2_grpc.ConnectionTServiceService
         return response
 
 
-class ResultsServiceServicer(proxy_pb2_grpc.ResultsServiceServicer):
-    def SendResults(self, request, context):
-        response = proxy_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
-        return response
-
-
 class Proxy:
     MAX_SECONDS = 4
 
@@ -56,7 +49,6 @@ class Proxy:
             print(e)
             sys.exit(-1)
         self._terminals = dict()  # this dictionary will store ports as keys and their correspondent stubs as values
-        self._terminalsQueue = Queue()
         self._server = None
         self._serverPort = 50055
 
@@ -73,21 +65,17 @@ class Proxy:
                     pollution.append(pickle.loads(self._r.brpop(redisQueues.POLLUTION)[1]))
                 except Exception as e:
                     print(e)
-            tstamp = pollution[len(pollution)-1].timestamp
-            result = proxy_pb2.Result(wellness=sum(wl.wellness for wl in wellness)/len(wellness),
-                                      pollution=sum(pl.pollution for pl in pollution)/len(pollution),
+            tstamp = pollution[len(pollution) - 1].timestamp
+            result = proxy_pb2.Result(wellness=sum(wl.wellness for wl in wellness) / len(wellness),
+                                      pollution=sum(pl.pollution for pl in pollution) / len(pollution),
                                       datetime=tstamp)
             print(result)
-            '''
             for terminal in self._terminals.keys():
                 self._terminals[terminal].SendResults(result)
-            '''
 
     def addTerminal(self, port):
         channel = grpc.insecure_channel('localhost:' + str(port))
         self._terminals[port] = proxy_pb2_grpc.ResultsServiceStub(channel)
-        self._terminalsQueue.put(port)
-
         print("Added connection to terminal in port " + str(port))
 
     def serve(self):
@@ -95,8 +83,6 @@ class Proxy:
         print('Starting Proxy server. Listening on port 50055 for terminals to establish connection.')
         with futures.ThreadPoolExecutor(max_workers=10) as pool:
             self._server = grpc.server(pool)
-            proxy_pb2_grpc.add_ResultsServiceServicer_to_server(
-                ResultsServiceServicer(), self._server)
             userTerminal_pb2_grpc.add_ConnectionTServiceServicer_to_server(
                 ConnectionTServiceServicer(), self._server)
             try:

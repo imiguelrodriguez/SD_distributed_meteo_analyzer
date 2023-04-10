@@ -42,8 +42,8 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         wellness_pkl = pickle.dumps(wellness)
         try:
             self._r.lpush(redisQueues.WELLNESS, wellness_pkl)
-        except Exception:
-            print("Error in connection to REDIS server")
+        except Exception as e:
+            print(e)
         return self._connection
 
     def ProcessPollutionData(self, data, context):
@@ -103,4 +103,5 @@ class ProcessingServer:
         return self._subscribeChannel
 
 
-ProcessingServer()
+if __name__ == "__main__":
+    ProcessingServer()
