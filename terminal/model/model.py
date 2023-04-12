@@ -65,14 +65,14 @@ class Terminal:
 
 if __name__ == '__main__':
     t = Terminal()
-    view = TerminalWindow()
-    controller = Controller(view=view, model=t)
+    controller = Controller(model=t)
+    view = controller.createWindow()
     view.setController(controller)
 
-    with futures.ThreadPoolExecutor(max_workers=5) as executor:
-        executor.submit(t.listen)
-        executor.submit(controller.runWindow)
-        executor.submit(controller.initPlot)
+    executor = futures.ThreadPoolExecutor(max_workers=5)
+    executor.submit(t.listen)
+
+    controller.runWindow()
 
 
 
