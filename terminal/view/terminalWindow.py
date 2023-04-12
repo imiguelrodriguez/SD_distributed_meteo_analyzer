@@ -10,28 +10,63 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvas
 
 
+class Table:
+    def __init__(self, root, headers, data):
+        self.root = root
+        self.reWrite(root, headers, data)
+        j = 0
+        for header in headers:
+            e = Entry(root, width=20, fg='black',
+                      font=('Arial', 18, 'bold'), background='grey')
+            e.configure(state='normal')
+            e.grid(row=0, column=j)
+            e.insert(END, header)
+            e.configure(state='disabled', disabledbackground="gray", disabledforeground="black")
+            j += 1
+
+    def reWrite(self, root, headers, data):
+        for i in range(1, len(data) + 1):
+            for j in range(len(headers)):
+                e = Entry(root, width=20, fg='blue',
+                          font=('Arial', 16, 'bold'))
+                e.configure(state='normal')
+                e.grid(row=i, column=j)
+                e.insert(END, data[i - 1][j])
+                if j != 0:
+                    e.configure(state='disabled', disabledbackground="white",
+                                disabledforeground=self.getColor(j, data[i - 1][j]))
+                else:
+                    e.configure(state='disabled', disabledbackground="white",
+                                disabledforeground="black")
+
+    def getColor(self, index, value):
+        value = float(value)
+        if index == 0:
+            if value < 0.25:
+                return "red"
+            elif value < 0.5:
+                return "orange"
+            elif value < 0.75:
+                return "gold2"
+            else:
+                return "green"
+        else:
+            if value < 0.25:
+                return "green"
+            elif value < 0.5:
+                return "gold2"
+            elif value < 0.75:
+                return "orange"
+            else:
+                return "red"
+
+
 class TerminalWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-
-        def fixed_map(option):
-            # Fix for setting text colour for Tkinter 8.6.9
-            # From: https://core.tcl.tk/tk/info/509cafafae
-            #
-            # Returns the style map for 'option' with any styles starting with
-            # ('!disabled', '!selected', ...) filtered out.
-
-            # style.map() returns an empty list for missing options, so this
-            # should be future-safe.
-            return [elm for elm in style.map('Treeview', query_opt=option) if
-                    elm[:2] != ('!disabled', '!selected')]
-
-        style = ttk.Style()
-        style.map('Treeview', foreground=fixed_map('foreground'),
-                  background=fixed_map('background'))
-
         # Adding a title to the window
         self.wm_title("Terminal window")
+        self.geometry("1200x1200")
         self._titleLabel = Label(self, text="Meteo data real time plotting", font=("Arial", 20, "bold"))
         self._titleLabel.grid(row=0, padx=10, pady=10)
         self._controller = None
@@ -56,90 +91,38 @@ class TerminalWindow(tk.Tk):
         self._x_date = []
         self._y_pollution = []
         self._y_wellness = []
-        self._tree = ttk.Treeview(self)
 
-        # Define the columns of the table
-        self._tree["columns"] = ("Wellness", "Pollution")
-        self._tree.tag_configure("bold", font=("Consolas", 13, "bold"))
-        self._tree.tag_configure("red_text", font=("Consolas", 13, "bold"), foreground="red")
-        self._tree.tag_configure("green_text", font=("Consolas", 13, "bold"), foreground="green")
-        self._tree.tag_configure("orange_text", font=("Consolas", 13, "bold"), foreground="orange")
-        self._tree.tag_configure("yellow_text", font=("Consolas", 13, "bold"), foreground="yellow")
-        # Add headings for each column
-        style = ttk.Style()
-        style.configure("Treeview.Heading", font=("Arial", 16, "bold"))
-        self._tree.heading("#0", text="Statistics", anchor=tkinter.CENTER)
-        self._tree.heading("Wellness", text="Wellness", anchor=tkinter.CENTER)
-        self._tree.heading("Pollution", text="Pollution", anchor=tkinter.CENTER)
-
-        # Add some data to the table
-        self._tree.insert("", "end", text="Historical Average", values=(0.0, 0.0))
-        self._tree.insert("", "end", text="Window Average", values=(0.0, 0.0))
-        self._tree.insert("", "end", text="Historical Maximum", values=(0.0, 0.0))
-        self._tree.insert("", "end", text="Window Maximum", values=(0.0, 0.0))
-        self._tree.insert("", "end", text="Historical Minimum", values=(0.0, 0.0))
-        self._tree.insert("", "end", text="Window Minimum", values=(0.0, 0.0))
-
-        # Store the item identifiers in a dictionary
-        self._items = {
-            "Historical Average": self._tree.get_children()[0],
-            "Window Average": self._tree.get_children()[1],
-            "Historical Maximum": self._tree.get_children()[2],
-            "Window Maximum": self._tree.get_children()[3],
-            "Historical Minimum": self._tree.get_children()[4],
-            "Window Minimum": self._tree.get_children()[5]
-        }
-
-        for row in self._tree.get_children():
-            self._tree.item(row, tags=("bold",))
-        self._tree.grid(row=1, column=1, padx=10, pady=10)
+        self._headers = ["Statistics", "Wellness", "Pollution"]
+        data = [["Window Average", self._wWAverage, self._wPAverage],
+                ["Historical Average", self._hWAverage, self._hPAverage],
+                ["Window Maximum", self._wWMax, self._wPMax],
+                ["Historical Maximum", self._hWMax, self._hPMax],
+                ["Window Minimum", self._wWMin, self._wPMin],
+                ["Historical Minimum", self._hWMin, self._hPMin]]
+        self._frame = tk.Frame(self)
+        self._frame.grid(row=1, column=1, padx=10, pady=10, columnspan=2, rowspan=2)
+        self._table = Table(self._frame, self._headers, data)
 
     def updateTable(self):
         self._wWAverage = round(sum(self._y_wellness) / len(self._y_wellness), 2)
-        self._tree.set(self._items["Window Average"], "Wellness", self._wWAverage)
-        self._tree.item(self._items["Window Average"], tag=(self.getColor("Wellness", self._wWAverage),))
         self._hWAverage = round((self._wWAverage + self._hWAverage) / 2, 2)
-        self._tree.set(self._items["Historical Average"], "Wellness", self._hWAverage)
         self._wPAverage = round(sum(self._y_pollution) / len(self._y_pollution), 2)
-        self._tree.set(self._items["Window Average"], "Pollution", self._wPAverage)
         self._hPAverage = round((self._wPAverage + self._hPAverage) / 2, 2)
-        self._tree.set(self._items["Historical Average"], "Pollution", self._hPAverage)
         self._wWMax = round(max(self._y_wellness), 2)
-        self._tree.set(self._items["Window Maximum"], "Wellness", self._wWMax)
         self._wPMax = round(max(self._y_pollution), 2)
-        self._tree.set(self._items["Window Maximum"], "Pollution", self._wPMax)
         self._hWMax = round(max(self._wWMax, self._hWMax), 2)
-        self._tree.set(self._items["Historical Maximum"], "Wellness", self._hWMax)
         self._hPMax = round(max(self._wPMax, self._hPMax), 2)
-        self._tree.set(self._items["Historical Maximum"], "Pollution", self._hPMax)
         self._wWMin = round(min(self._y_wellness), 2)
-        self._tree.set(self._items["Window Minimum"], "Wellness", self._wWMin)
         self._wPMin = round(min(self._y_pollution), 2)
-        self._tree.set(self._items["Window Minimum"], "Pollution", self._wPMin)
         self._hWMin = round(min(self._wWMin, self._hWMin), 2)
-        self._tree.set(self._items["Historical Minimum"], "Wellness", self._hWMin)
         self._hPMin = round(min(self._wPMin, self._hPMin), 2)
-        self._tree.set(self._items["Historical Minimum"], "Pollution", self._hPMin)
-
-    def getColor(self, index, value):
-        if index == "Wellness":
-            if value < 0.25:
-                return "red_text"
-            elif value < 0.5:
-                return "orange_text"
-            elif value < 0.75:
-                return "yellow_text"
-            else:
-                return "green_text"
-        else:
-            if value < 0.25:
-                return "green_text"
-            elif value < 0.5:
-                return "yellow_text"
-            elif value < 0.75:
-                return "orange_text"
-            else:
-                return "red_text"
+        data = [["Window Average", self._wWAverage, self._wPAverage],
+                ["Historical Average", self._hWAverage, self._hPAverage],
+                ["Window Maximum", self._wWMax, self._wPMax],
+                ["Historical Maximum", self._hWMax, self._hPMax],
+                ["Window Minimum", self._wWMin, self._wPMin],
+                ["Historical Minimum", self._hWMin, self._hPMin]]
+        self._table.reWrite(self._frame, self._headers, data)
 
     def plot(self):
         # Create figure for plotting
