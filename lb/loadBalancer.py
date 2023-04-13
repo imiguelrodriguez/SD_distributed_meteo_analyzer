@@ -1,3 +1,5 @@
+import os
+import socket
 from queue import Queue
 
 import grpc
@@ -41,7 +43,7 @@ class ConnectionServiceServicer(processingServer_pb2_grpc.ConnectionServiceServi
 
 
 class LoadBalancer:
-    _lbSensorsPort = 50051
+
     _lbServersPort = 50052
 
     def __init__(self):
@@ -49,6 +51,18 @@ class LoadBalancer:
         self._servers = dict()  # this dictionary will store ports as keys and their correspondent stubs as values
         self._serversQueue = Queue()
         self._server = None
+        sock = socket.socket()
+        sock.bind(('', 0))
+        self._lbSensorsPort = sock.getsockname()[1]
+        with open(".." + os.sep + "lbSensorsPort.txt", "w") as f:
+            f.write(str(self._lbSensorsPort))
+            f.close()
+        sock = socket.socket()
+        sock.bind(('', 0))
+        self._lbServersPort = sock.getsockname()[1]
+        with open(".." + os.sep + "lbServersPort.txt", "w") as f:
+            f.write(str(self._lbServersPort))
+            f.close()
 
     def processResponse(self, call_future):
         self._serversQueue.put(call_future.result().port)
@@ -65,8 +79,7 @@ class LoadBalancer:
                 call_future.add_done_callback(self.processResponse)
 
     def serve(self):
-        # listen on port 50051
-        print('Starting Load Balancer server. Listening on port 50051 for sensors.')
+        print('Starting Load Balancer server. Listening on port ' + str(self._lbSensorsPort) + ' for sensors.')
         with futures.ThreadPoolExecutor(max_workers=10) as pool:
             self._server = grpc.server(pool)
 
@@ -79,7 +92,8 @@ class LoadBalancer:
 
             self._server.add_insecure_port('[::]:' + str(self._lbSensorsPort))
             self._server.add_insecure_port('[::]:' + str(self._lbServersPort))
-            print('Listening on port 50052 for new processing servers connection establishing.')
+            print('Listening on port ' + str(self._lbServersPort) + ' for new processing servers connection '
+                                                                    'establishing.')
             self._server.start()
             try:
                 self._server.wait_for_termination()
