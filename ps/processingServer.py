@@ -1,3 +1,4 @@
+import os
 from concurrent import futures
 
 import grpc
@@ -72,8 +73,12 @@ class ProcessingServer:
         self.serve()
 
     def subscribeToLB(self):
+        lbPort = ""
+        with open(".." + os.sep + "lbServersPort.txt", "r") as f:
+            lbPort = f.readline()
+            f.close()
         # subscribe channel to send the chosen port to the LB
-        self._subscribeChannel = grpc.insecure_channel('localhost:50052')
+        self._subscribeChannel = grpc.insecure_channel('localhost:' + lbPort)
         connection = processingServer_pb2.Connection()
         connection.port = self._port
         print("Chosen port for server: " + str(self._port))
