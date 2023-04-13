@@ -1,3 +1,5 @@
+import sys
+
 import grpc
 import pollutionSensor_pb2
 import pollutionSensor_pb2_grpc
@@ -5,6 +7,8 @@ from data import rawTypes_pb2
 from meteo_utils import MeteoDataDetector
 import time
 import datetime
+
+print("Running pollution sensor.")
 
 # open a gRPC channel
 channel = grpc.insecure_channel('localhost:50051')
@@ -24,6 +28,9 @@ while True:
 
     # create a valid request message
     message = rawTypes_pb2.RawPollutionData(co2=int(data['co2']), datetime=timestamp)
-
-    # send message
-    stub.SendPollutionData(message)
+    try:
+        # send message
+        stub.SendPollutionData(message)
+    except Exception:
+        print("Server stopped.")
+        sys.exit(0)

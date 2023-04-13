@@ -1,13 +1,16 @@
+import ctypes
+import os
 import socket
+import sys
 import time
 from concurrent import futures
 from queue import Queue
+from threading import Event
 
 import grpc
 from terminal import userTerminal_pb2, userTerminal_pb2_grpc
 import proxy.proxy_pb2_grpc as proxy_pb2_grpc
 from terminal.controller.controller import Controller
-from terminal.view.terminalWindow import TerminalWindow
 
 
 class ResultsServiceServicer(proxy_pb2_grpc.ResultsServiceServicer):
@@ -30,7 +33,11 @@ class Terminal:
 
     def subscribeToProxy(self):
         # subscribe channel to send the chosen port to the LB
-        self._subscribeChannel = grpc.insecure_channel('localhost:50055')
+        proxyPort = ""
+        with open(".." + os.sep + ".." + os.sep + "proxyPort.txt", "r") as f:
+            proxyPort = f.readline()
+            f.close()
+        self._subscribeChannel = grpc.insecure_channel('localhost:'+proxyPort)
         try:
             connectionT = userTerminal_pb2.ConnectionT()
             connectionT.port = self._port
@@ -62,17 +69,18 @@ class Terminal:
     def resultsQueue(self):
         return self._resultsQueue
 
+    def endTerminal(self):
+        print("Closing terminal.")
+        executor.shutdown(wait=False)
+        self._server.stop(grace=None)
+        sys.exit(0)
+
 
 if __name__ == '__main__':
     t = Terminal()
     controller = Controller(model=t)
     view = controller.createWindow()
     view.setController(controller)
-
-    executor = futures.ThreadPoolExecutor(max_workers=5)
+    executor = futures.ThreadPoolExecutor(max_workers=1)
     executor.submit(t.listen)
-
     controller.runWindow()
-
-
-

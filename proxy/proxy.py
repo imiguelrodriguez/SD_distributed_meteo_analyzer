@@ -1,4 +1,6 @@
+import os
 import pickle
+import socket
 import sys
 import time
 from concurrent import futures
@@ -50,7 +52,12 @@ class Proxy:
             sys.exit(-1)
         self._terminals = dict()  # this dictionary will store ports as keys and their correspondent stubs as values
         self._server = None
-        self._serverPort = 50055
+        sock = socket.socket()
+        sock.bind(('', 0))
+        self._serverPort = sock.getsockname()[1]
+        with open(".." + os.sep + "proxyPort.txt", "w") as f:
+            f.write(str(self._serverPort))
+            f.close()
 
     def tumblingWindow(self):
         while True:
@@ -71,7 +78,12 @@ class Proxy:
                                       datetime=tstamp)
             print(result)
             for terminal in self._terminals.keys():
-                self._terminals[terminal].SendResults(result)
+                try:
+                    self._terminals[terminal].SendResults(result)
+                except Exception:
+                    print("Terminal " + str(terminal) + " disconnected.")
+                    self._terminals.pop(terminal)
+                    self.tumblingWindow()
 
     def addTerminal(self, port):
         channel = grpc.insecure_channel('localhost:' + str(port))
@@ -80,7 +92,7 @@ class Proxy:
 
     def serve(self):
         # listen on port 50055
-        print('Starting Proxy server. Listening on port 50055 for terminals to establish connection.')
+        print('Starting Proxy server. Listening on port ' + str(self._serverPort) + ' for terminals to establish connection.')
         with futures.ThreadPoolExecutor(max_workers=10) as pool:
             self._server = grpc.server(pool)
             userTerminal_pb2_grpc.add_ConnectionTServiceServicer_to_server(

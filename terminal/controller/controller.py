@@ -17,9 +17,14 @@ class Controller:
 
     def runWindow(self):
         self.initPlot()
+        self._view.protocol("WM_DELETE_WINDOW", self.windowClosed)
         self._view.mainloop()
 
     def createWindow(self):
         root = terminal.view.terminalWindow.TerminalWindow()
         self._view = root
         return root
+
+    def windowClosed(self):
+        self._view.destroy()
+        self._model.endTerminal()

@@ -70,7 +70,7 @@ class TerminalWindow(tk.Tk):
         self._titleLabel = Label(self, text="Meteo data real time plotting", font=("Arial", 20, "bold"))
         self._titleLabel.grid(row=0, padx=10, pady=10)
         self._controller = None
-        self._figure = plt.figure()
+        self._figure = plt.figure(figsize=(10, 8))
         self._canvas = FigureCanvas(self._figure)
         self._toolbar = NavigationToolbar2Tk(self._canvas, self, pack_toolbar=False)
         self._toolbar.grid(row=2)

@@ -1,3 +1,5 @@
+import sys
+
 import grpc
 import airSensor_pb2
 import airSensor_pb2_grpc
@@ -6,6 +8,7 @@ from meteo_utils import MeteoDataDetector
 import time
 import datetime
 
+print("Running air sensor.")
 # open a gRPC channel
 channel = grpc.insecure_channel('localhost:50051')
 
@@ -25,6 +28,9 @@ while True:
     # create a valid request message
     message = rawTypes_pb2.RawMeteoData(temperature=data['temperature'], humidity=data['humidity'],
                                         datetime=timestamp)
-
+    try:
     # send message
-    stub.SendAirData(message)
+        stub.SendAirData(message)
+    except Exception:
+        print("Server stopped.")
+        sys.exit(0)
