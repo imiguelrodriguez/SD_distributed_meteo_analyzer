@@ -34,19 +34,23 @@ class Terminal:
     def subscribeToProxy(self):
         # subscribe channel to send the chosen port to the LB
         proxyPort = ""
-        with open(".." + os.sep + ".." + os.sep + "proxyPort.txt", "r") as f:
-            proxyPort = f.readline()
-            f.close()
-        self._subscribeChannel = grpc.insecure_channel('localhost:'+proxyPort)
         try:
-            connectionT = userTerminal_pb2.ConnectionT()
-            connectionT.port = self._port
-            print("Chosen port for terminal: " + str(self._port))
-            stub = userTerminal_pb2_grpc.ConnectionTServiceStub(self._subscribeChannel)
-            stub.SubscribeToProxy(connectionT)
-        except Exception as e:
-            print("There is a problem establishing connection with the proxy server.")
-            print(e)
+            with open(".." + os.sep + ".." + os.sep + "proxyPort.txt", "r") as f:
+                proxyPort = f.readline()
+                f.close()
+            self._subscribeChannel = grpc.insecure_channel('localhost:'+proxyPort)
+            try:
+                connectionT = userTerminal_pb2.ConnectionT()
+                connectionT.port = self._port
+                print("Chosen port for terminal: " + str(self._port))
+                stub = userTerminal_pb2_grpc.ConnectionTServiceStub(self._subscribeChannel)
+                stub.SubscribeToProxy(connectionT)
+            except Exception as e:
+                print("There is a problem establishing connection with the proxy server.")
+                print(e)
+        except Exception:
+            print("Couldn't read Proxy port.")
+            sys.exit(0)
 
     def listen(self):
         print("Listening for results on port " + str(self._port) + " for proxy to send results.")

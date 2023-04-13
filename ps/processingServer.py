@@ -1,4 +1,5 @@
 import os
+import sys
 from concurrent import futures
 
 import grpc
@@ -74,16 +75,20 @@ class ProcessingServer:
 
     def subscribeToLB(self):
         lbPort = ""
-        with open(".." + os.sep + "lbServersPort.txt", "r") as f:
-            lbPort = f.readline()
-            f.close()
-        # subscribe channel to send the chosen port to the LB
-        self._subscribeChannel = grpc.insecure_channel('localhost:' + lbPort)
-        connection = processingServer_pb2.Connection()
-        connection.port = self._port
-        print("Chosen port for server: " + str(self._port))
-        stub = processingServer_pb2_grpc.ConnectionServiceStub(self._subscribeChannel)
-        stub.SubscribeToLoadBalancer(connection)
+        try:
+            with open(".." + os.sep + "lbServersPort.txt", "r") as f:
+                lbPort = f.readline()
+                f.close()
+            # subscribe channel to send the chosen port to the LB
+            self._subscribeChannel = grpc.insecure_channel('localhost:' + lbPort)
+            connection = processingServer_pb2.Connection()
+            connection.port = self._port
+            print("Chosen port for server: " + str(self._port))
+            stub = processingServer_pb2_grpc.ConnectionServiceStub(self._subscribeChannel)
+            stub.SubscribeToLoadBalancer(connection)
+        except Exception:
+            print("Couldn't read LB port.")
+            sys.exit(0)
 
     def serve(self):
         print('Starting Processing server. Listening on port ' + str(self._port))
