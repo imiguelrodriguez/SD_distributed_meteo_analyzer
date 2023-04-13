@@ -41,7 +41,7 @@ class Table:
 
     def getColor(self, index, value):
         value = float(value)
-        if index == 0:
+        if index == 1:
             if value < 0.25:
                 return "red"
             elif value < 0.5:
@@ -66,16 +66,16 @@ class TerminalWindow(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
         # Adding a title to the window
         self.wm_title("Terminal window")
-        self.geometry("1200x1200")
+        self.minsize(400, 400)
         self._titleLabel = Label(self, text="Meteo data real time plotting", font=("Arial", 20, "bold"))
-        self._titleLabel.grid(row=0, padx=10, pady=10)
+        self._titleLabel.pack(anchor="n", padx=10, pady=10)
         self._controller = None
-        self._figure = plt.figure(figsize=(10, 8))
+        self._figure = plt.figure()
         self._canvas = FigureCanvas(self._figure)
         self._toolbar = NavigationToolbar2Tk(self._canvas, self, pack_toolbar=False)
-        self._toolbar.grid(row=2)
         self._toolbar.update()
-        self._canvas.get_tk_widget().grid(row=1)
+        self._canvas.get_tk_widget().pack(anchor="center", padx=10, pady=10)
+        self._toolbar.pack(anchor="center", padx=10, pady=10)
         self._wWAverage = 0.0
         self._hWAverage = 0.0
         self._wPAverage = 0.0
@@ -100,8 +100,9 @@ class TerminalWindow(tk.Tk):
                 ["Window Minimum", self._wWMin, self._wPMin],
                 ["Historical Minimum", self._hWMin, self._hPMin]]
         self._frame = tk.Frame(self)
-        self._frame.grid(row=1, column=1, padx=10, pady=10, columnspan=2, rowspan=2)
+        self._frame.pack(anchor="s", padx=10, pady=10)
         self._table = Table(self._frame, self._headers, data)
+
 
     def updateTable(self):
         self._wWAverage = round(sum(self._y_wellness) / len(self._y_wellness), 2)
@@ -152,7 +153,9 @@ class TerminalWindow(tk.Tk):
             plt.title('Wellness and Pollution indexes')
             plt.xlabel('Date')
             plt.ylabel('Index')
-            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.22),
+                       shadow=True, ncol=2)
+
 
         # Set up plot to call animate() function periodically
         ani = animation.FuncAnimation(self._figure, animate, fargs=(self._x_date, self._y_wellness, self._y_pollution),
