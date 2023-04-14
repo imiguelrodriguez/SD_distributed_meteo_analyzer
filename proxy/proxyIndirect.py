@@ -2,13 +2,8 @@ import os
 import pickle
 import sys
 import time
-from concurrent import futures
-
 import pika
 import redis
-
-import proxy_pb2
-
 import redisQueues
 
 
@@ -34,10 +29,10 @@ class Result:
     def __init__(self, wellness, pollution, timestamp):
         self.wellness = wellness
         self.pollution = pollution
-        self.timestamp = timestamp
+        self.datetime = timestamp
 
     def __str__(self):
-        return f"Wellness: {self.wellness} Pollution: {self.pollution} Timestamp: {self.timestamp}"
+        return f"Wellness: {self.wellness} Pollution: {self.pollution} Timestamp: {self.datetime}"
 
 
 class Proxy:
@@ -75,9 +70,8 @@ class Proxy:
             result = Result(wellness=sum(wl.wellness for wl in wellness) / len(wellness),
                             pollution=sum(pl.pollution for pl in pollution) / len(pollution),
                             timestamp=tstamp)
-            print(result)
             self._channel.basic_publish(exchange='logs', routing_key='', body=pickle.dumps(result))
-            print(" [x] Sent %r" % result)
+            print(" [x] Sent %r" % result.__str__())
 
 
 if __name__ == '__main__':

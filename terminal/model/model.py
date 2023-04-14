@@ -1,11 +1,9 @@
-import ctypes
+import datetime
 import os
 import socket
 import sys
-import time
 from concurrent import futures
 from queue import Queue
-from threading import Event
 
 import grpc
 from terminal import userTerminal_pb2, userTerminal_pb2_grpc
@@ -15,6 +13,7 @@ from terminal.controller.controller import Controller
 
 class ResultsServiceServicer(proxy_pb2_grpc.ResultsServiceServicer):
     def SendResults(self, result, context):
+        result.datetime = datetime.datetime.fromtimestamp(result.datetime.ToSeconds()).strftime('%H:%M:%S')
         t.resultsQueue.put(result)
         print("Result: " + result.__str__())
         response = proxy_pb2_grpc.google_dot_protobuf_dot_empty__pb2.Empty()

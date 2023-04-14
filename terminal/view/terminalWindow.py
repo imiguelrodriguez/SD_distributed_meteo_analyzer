@@ -133,7 +133,7 @@ class TerminalWindow(tk.Tk):
         # This function is called periodically from FuncAnimation
         def animate(i, x_d, y_well, y_poll):
             result = self._controller.getResult()
-            x_d.append(dt.datetime.fromtimestamp(result.datetime.ToSeconds()).strftime('%H:%M:%S'))
+            x_d.append(result.datetime)
             y_well.append(result.wellness)
             y_poll.append(result.pollution)
             # Limit x and y lists to 20 items
