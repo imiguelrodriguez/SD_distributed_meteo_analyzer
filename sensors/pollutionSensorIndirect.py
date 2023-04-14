@@ -1,17 +1,32 @@
-
+import datetime
+import json
+import sys
+import time
 import pika
+import rabbitQueue
+from meteo_utils import MeteoDataDetector
 
 print("Running pollution sensor.")
+try:
 
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue=rabbitQueue.QUEUE)
+    generator = MeteoDataDetector()
+    while True:
+        time.sleep(2)
 
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-channel = connection.channel()
+        # obtain data
+        timestamp = datetime.datetime.now().timestamp()
+        data = generator.analyze_pollution()
+        data["timestamp"] = timestamp
+        # create a valid request message
 
-channel.queue_declare(queue="pollution_data")
-
-channel.basic_publish(exchange="",
-                      routing_key="pollution_data",
-                      body="Hello World".encode())
-print(" [x] Sent 'Hello World!'")
-
-connection.close()
+        channel.basic_publish(exchange="",
+                              routing_key=rabbitQueue.QUEUE,
+                              body=json.dumps(data).encode('utf-8'))
+        print(" [x] Sent " + data.__str__())
+except Exception as e:
+    print(e)
+    connection.close()
+    sys.exit(0)

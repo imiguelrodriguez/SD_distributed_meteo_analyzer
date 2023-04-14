@@ -1,0 +1,1 @@
+QUEUE = "sensors_queue"
