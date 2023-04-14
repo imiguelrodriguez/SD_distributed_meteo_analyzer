@@ -41,7 +41,12 @@ class PollutionAux:
 class ProcessingServer:
     def __init__(self):
         self._processor = meteo_utils.MeteoDataProcessor()
-        self._r = redis.Redis(host="localhost", port=6379)
+        try:
+            self._r = redis.Redis(host="localhost", port=6379)
+        except Exception as ex:
+            print("Error while connecting to Redis.")
+            print(ex)
+            sys.exit(-1)
 
     def ProcessMeteoData(self, data):
         temperature = data.temperature
@@ -96,8 +101,8 @@ if __name__ == '__main__':
         channel.start_consuming()
 
 
-    except KeyboardInterrupt:
-        print('Interrupted')
+    except Exception as e:
+        print(e)
         try:
             sys.exit(0)
         except SystemExit:
