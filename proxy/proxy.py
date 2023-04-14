@@ -1,10 +1,11 @@
+import datetime
 import os
 import pickle
 import socket
 import sys
 import time
 from concurrent import futures
-
+import pytz
 import grpc
 import redis
 
@@ -58,6 +59,8 @@ class Proxy:
         with open(".." + os.sep + "proxyPort.txt", "w") as f:
             f.write(str(self._serverPort))
             f.close()
+        # Create a timezone object for Madrid
+        self._spain_tz = pytz.timezone('Europe/Madrid')
 
     def tumblingWindow(self):
         while True:
@@ -73,9 +76,10 @@ class Proxy:
                 except Exception as e:
                     print(e)
             tstamp = pollution[len(pollution) - 1].timestamp
+            dateString = datetime.datetime.fromtimestamp(tstamp.ToSeconds()).strftime('%H:%M:%S')
             result = proxy_pb2.Result(wellness=sum(wl.wellness for wl in wellness) / len(wellness),
                                       pollution=sum(pl.pollution for pl in pollution) / len(pollution),
-                                      datetime=tstamp)
+                                      datetime=dateString)
             print(result)
             for terminal in self._terminals.keys():
                 try:
