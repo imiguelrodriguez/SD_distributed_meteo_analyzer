@@ -1,7 +1,7 @@
 # SD_distributed_meteo_analyzer
 Task 1 of SD (Sistemes Distribuïts) subject. The system analyzes fictional meteorogical data and communicates with servers which process and store the data. It explores both direct and indirect communication. The results will be shown as a real-time plot in a terminal. 
 
-The system has been developed using the PyCharm IDE and a virtual environment. The required installed modules are: `grpcio`, `pika`, `pickle`, `json`, `redis`, `pytz` and `matplotlib`. The rest of the modules are supposed to be installed by default.
+The system has been developed using the PyCharm IDE and a virtual environment. The required installed modules are: `grpcio`, `pika`, `pickle`, `json`, `redis`, `pytz`, `matplotlib`, `numpy` and `scipy`. The rest of the modules are supposed to be installed by default.
 
 Please, make sure that a **Redis** server is running on default port 6379, and a **RabbitMQ** server is running on default port 5672.
 ## Direct communication
