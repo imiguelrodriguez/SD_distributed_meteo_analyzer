@@ -5,7 +5,6 @@ import socket
 import sys
 import time
 from concurrent import futures
-import pytz
 import grpc
 import redis
 
@@ -59,8 +58,6 @@ class Proxy:
         with open(".." + os.sep + "proxyPort.txt", "w") as f:
             f.write(str(self._serverPort))
             f.close()
-        # Create a timezone object for Madrid
-        self._spain_tz = pytz.timezone('Europe/Madrid')
 
     def tumblingWindow(self):
         while True:

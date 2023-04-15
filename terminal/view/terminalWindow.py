@@ -1,8 +1,5 @@
-import tkinter
 import tkinter as tk
 from tkinter import *
-import datetime as dt
-from tkinter import ttk
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation

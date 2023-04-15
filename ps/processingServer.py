@@ -31,7 +31,12 @@ class DataProcessingServicer(loadBalancer_pb2_grpc.DataProcessingServiceServicer
         self._connection = processingServer_pb2.Connection(port=self._ps.port)
         self._stub = processingServer_pb2_grpc.ConnectionServiceStub(self._ps.subscribeChannel)
         self._processor = meteo_utils.MeteoDataProcessor()
-        self._r = redis.Redis(host="localhost", port=6379)
+        try:
+            self._r = redis.Redis(host="localhost", port=6379)
+        except Exception as e:
+            print("There is a problem with the Redis server.")
+            print(e)
+            sys.exit(-1)
 
     def ProcessMeteoData(self, data, context):
         temperature = data.temperature

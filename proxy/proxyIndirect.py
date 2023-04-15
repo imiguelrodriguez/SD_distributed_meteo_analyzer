@@ -46,8 +46,14 @@ class Proxy:
             print("There is a problem when connecting to the REDIS server.")
             print(e)
             sys.exit(-1)
-        self._connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='localhost'))
+        try:
+            self._connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host='localhost'))
+        except Exception as e2:
+            print("There is a problem when connecting to the RabbitMQ server.")
+            print(e2)
+            sys.exit(-1)
+
         self._channel = self._connection.channel()
         self._channel.exchange_declare(exchange='logs', exchange_type='fanout')
         self.tumblingWindow()

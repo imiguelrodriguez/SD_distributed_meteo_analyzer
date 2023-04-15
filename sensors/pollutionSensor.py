@@ -4,7 +4,6 @@ import sys
 import grpc
 import pytz
 
-import pollutionSensor_pb2
 import pollutionSensor_pb2_grpc
 from data import rawTypes_pb2
 from meteo_utils import MeteoDataDetector

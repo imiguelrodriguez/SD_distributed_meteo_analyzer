@@ -43,9 +43,6 @@ class ConnectionServiceServicer(processingServer_pb2_grpc.ConnectionServiceServi
 
 
 class LoadBalancer:
-
-    _lbServersPort = 50052
-
     def __init__(self):
         self._dataQueue = Queue()
         self._servers = dict()  # this dictionary will store ports as keys and their correspondent stubs as values

@@ -4,7 +4,6 @@ import pickle
 
 import pika
 import sys
-import time
 
 import redis
 
